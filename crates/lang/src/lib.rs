@@ -3,6 +3,7 @@ use crate::{env::Env, val::Val};
 pub mod binding_def;
 pub mod env;
 pub mod expr;
+pub mod func_def;
 pub mod statements;
 pub mod utils;
 pub mod val;

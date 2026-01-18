@@ -1,4 +1,11 @@
-use crate::{utils, val::Val};
+use crate::{
+    env::Env,
+    expr::{binding_usage::BindingUsage, block::Block},
+    utils,
+    val::Val,
+};
+pub mod binding_usage;
+pub mod block;
 
 #[derive(Debug, PartialEq)]
 pub struct Number(pub i32);
@@ -15,11 +22,19 @@ pub enum Op {
 pub enum Expr {
     Number(Number),
     Operation { lhs: Number, rhs: Number, op: Op },
+    BindingUsage(BindingUsage),
+    Block(Block),
 }
 
 impl Expr {
     pub fn new(s: &str) -> Result<(&str, Self), String> {
-        Self::new_operation(s).or_else(|_| Self::new_number(s))
+        Self::new_operation(s)
+            .or_else(|_| Self::new_number(s))
+            .or_else(|_| {
+                BindingUsage::new(s)
+                    .map(|(s, binding_usage)| (s, Self::BindingUsage(binding_usage)))
+            })
+            .or_else(|_| Block::new(s).map(|(s, block)| (s, Self::Block(block))))
     }
 
     fn new_operation(s: &str) -> Result<(&str, Self), String> {
@@ -38,9 +53,9 @@ impl Expr {
         Number::new(s).map(|(s, number)| (s, Self::Number(number)))
     }
 
-    pub(crate) fn eval(&self) -> Val {
+    pub(crate) fn eval(&self, env: &Env) -> Result<Val, String> {
         match self {
-            Self::Number(Number(n)) => Val::Number(*n),
+            Self::Number(Number(n)) => Ok(Val::Number(*n)),
             Self::Operation { lhs, rhs, op } => {
                 let Number(lhs) = lhs;
                 let Number(rhs) = rhs;
@@ -52,8 +67,10 @@ impl Expr {
                     Op::Div => lhs / rhs,
                 };
 
-                Val::Number(result)
+                Ok(Val::Number(result))
             }
+            Self::BindingUsage(binding_usage) => binding_usage.eval(env),
+            Self::Block(block) => block.eval(env),
         }
     }
 }
@@ -76,6 +93,8 @@ impl Number {
 }
 #[cfg(test)]
 mod tests {
+    use crate::{env::Env, expr::binding_usage::BindingUsage, statements::Stmt};
+
     use super::*;
 
     #[test]
@@ -141,8 +160,8 @@ mod tests {
                 rhs: Number(10),
                 op: Op::Add,
             }
-            .eval(),
-            Val::Number(20),
+            .eval(&Env::default()),
+            Ok(Val::Number(20)),
         );
     }
 
@@ -154,8 +173,8 @@ mod tests {
                 rhs: Number(5),
                 op: Op::Sub,
             }
-            .eval(),
-            Val::Number(-4),
+            .eval(&Env::default()),
+            Ok(Val::Number(-4)),
         );
     }
 
@@ -167,8 +186,8 @@ mod tests {
                 rhs: Number(6),
                 op: Op::Mul,
             }
-            .eval(),
-            Val::Number(30),
+            .eval(&Env::default()),
+            Ok(Val::Number(30)),
         );
     }
 
@@ -180,13 +199,64 @@ mod tests {
                 rhs: Number(20),
                 op: Op::Div,
             }
-            .eval(),
-            Val::Number(10),
+            .eval(&Env::default()),
+            Ok(Val::Number(10)),
         );
     }
 
     #[test]
     fn parse_number_as_expr() {
         assert_eq!(Expr::new("456"), Ok(("", Expr::Number(Number(456)))));
+    }
+
+    #[test]
+    fn parse_binding_usage() {
+        assert_eq!(
+            Expr::new("bar"),
+            Ok((
+                "",
+                Expr::BindingUsage(BindingUsage {
+                    name: "bar".to_string()
+                })
+            ))
+        )
+    }
+
+    #[test]
+    fn parse_block() {
+        assert_eq!(
+            Expr::new("{ 200 }"),
+            Ok((
+                "",
+                Expr::Block(Block {
+                    stmts: vec![Stmt::Expr(Expr::Number(Number(200)))],
+                }),
+            )),
+        );
+    }
+
+    #[test]
+    fn eval_binding_usage() {
+        let mut env = Env::default();
+        env.store_binding("ten".to_string(), Val::Number(10));
+
+        assert_eq!(
+            Expr::BindingUsage(BindingUsage {
+                name: "ten".to_string(),
+            })
+            .eval(&env),
+            Ok(Val::Number(10)),
+        );
+    }
+
+    #[test]
+    fn eval_block() {
+        assert_eq!(
+            Expr::Block(Block {
+                stmts: vec![Stmt::Expr(Expr::Number(Number(10)))],
+            })
+            .eval(&Env::default()),
+            Ok(Val::Number(10)),
+        );
     }
 }

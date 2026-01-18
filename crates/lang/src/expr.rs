@@ -1,6 +1,7 @@
 use crate::{
     env::Env,
     expr::{binding_usage::BindingUsage, block::Block},
+    func_call::FuncCall,
     utils,
     val::Val,
 };
@@ -28,6 +29,7 @@ pub enum Expr {
     },
     BindingUsage(BindingUsage),
     Block(Block),
+    FuncCall(FuncCall),
 }
 
 impl Expr {
@@ -37,6 +39,7 @@ impl Expr {
 
     fn new_non_operation(s: &str) -> Result<(&str, Self), String> {
         Self::new_number(s)
+            .or_else(|_| FuncCall::new(s).map(|(s, func_call)| (s, Self::FuncCall(func_call))))
             .or_else(|_| {
                 BindingUsage::new(s)
                     .map(|(s, binding_usage)| (s, Self::BindingUsage(binding_usage)))
@@ -90,6 +93,7 @@ impl Expr {
             }
             Self::BindingUsage(binding_usage) => binding_usage.eval(env),
             Self::Block(block) => block.eval(env),
+            Self::FuncCall(func_call) => func_call.eval(env),
         }
     }
 }
@@ -289,6 +293,20 @@ mod tests {
             }
             .eval(&Env::default()),
             Err("cannot evaluate operation whose left-hand side and right-hand side are not both numbers".to_string()),
+        );
+    }
+
+    #[test]
+    fn parse_func_call() {
+        assert_eq!(
+            Expr::new("add 1 2"),
+            Ok((
+                "",
+                Expr::FuncCall(FuncCall {
+                    callee: "add".to_string(),
+                    params: vec![Expr::Number(Number(1)), Expr::Number(Number(2))],
+                }),
+            )),
         );
     }
 }

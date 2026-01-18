@@ -17,6 +17,7 @@ impl FuncDef {
 
         let (s, params) = utils::sequence(
             |s| utils::extract_ident(s).map(|(s, ident)| (s, ident.to_string())),
+            utils::extract_whitespace,
             s,
         )?;
         let s = utils::tag("=>", s)?;

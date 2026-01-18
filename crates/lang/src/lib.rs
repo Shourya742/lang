@@ -7,7 +7,6 @@ pub mod statements;
 pub mod utils;
 pub mod val;
 
-
 pub struct Parse(statements::Stmt);
 
 pub fn parse(s: &str) -> Result<Parse, String> {

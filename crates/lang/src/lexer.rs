@@ -3,7 +3,7 @@ use num_derive::{FromPrimitive, ToPrimitive};
 
 #[derive(Debug, Clone, Copy, PartialEq, Logos, FromPrimitive, ToPrimitive)]
 pub enum SyntaxKind {
-    #[regex(" +")]
+    #[regex("[ \n]+")]
     Whitespace,
     #[token("fn")]
     FnKw,
@@ -33,9 +33,17 @@ pub enum SyntaxKind {
     LParen,
     #[token(")")]
     RParen,
+    #[token("#.*")]
+    Comment,
     Root,
     BinaryExpr,
     PrefixExpr,
+}
+
+impl SyntaxKind {
+    pub(crate) fn is_trivia(self) -> bool {
+        matches!(self, Self::Whitespace | Self::Comment)
+    }
 }
 
 pub(crate) struct Lexer<'a> {

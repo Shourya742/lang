@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use lang::parser::Parser;
+use lang::parser::{Parser, parse};
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();
@@ -13,7 +13,7 @@ fn main() -> io::Result<()> {
         stdout.flush()?;
 
         stdin.read_line(&mut input)?;
-        let parse = Parser::new(&input).parse();
+        let parse = parse(&input);
         println!("{}", parse.debug_tree());
 
         input.clear();

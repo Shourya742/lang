@@ -9,7 +9,7 @@ pub enum SyntaxKind {
     FnKw,
     #[token("let")]
     LetKw,
-    #[regex("[A-Za-z][A-Za-z0-9]+")]
+    #[regex("[A-Za-z][A-Za-z0-9]*")]
     Ident,
     #[regex("[0-9]+")]
     Number,
@@ -29,8 +29,13 @@ pub enum SyntaxKind {
     RBrace,
     #[error]
     Error,
+    #[token("(")]
+    LParen,
+    #[token(")")]
+    RParen,
     Root,
-    BinOp,
+    BinaryExpr,
+    PrefixExpr,
 }
 
 pub(crate) struct Lexer<'a> {

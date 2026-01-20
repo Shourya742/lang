@@ -8,15 +8,30 @@ pub fn expr_binding_power(p: &mut Parser, minimum_binding_power: u8) {
     let checkpoint = p.checkpoint();
     match p.peek() {
         Some(SyntaxKind::Number) | Some(SyntaxKind::Ident) => p.bump(),
+        Some(SyntaxKind::Minus) => {
+            let op = PrefixOp::Neg;
+            let ((), righ_binding_power) = op.binding_power();
+            p.bump();
+
+            p.start_node_at(checkpoint, SyntaxKind::PrefixExpr);
+            expr_binding_power(p, righ_binding_power);
+            p.finish_node();
+        }
+        Some(SyntaxKind::LParen) => {
+            p.bump();
+            expr_binding_power(p, 0);
+            assert_eq!(p.peek(), Some(SyntaxKind::RParen));
+            p.bump();
+        }
         _ => {}
     }
 
     loop {
         let op = match p.peek() {
-            Some(SyntaxKind::Plus) => Op::Add,
-            Some(SyntaxKind::Minus) => Op::Sub,
-            Some(SyntaxKind::Star) => Op::Mul,
-            Some(SyntaxKind::Slash) => Op::Div,
+            Some(SyntaxKind::Plus) => Infix::Add,
+            Some(SyntaxKind::Minus) => Infix::Sub,
+            Some(SyntaxKind::Star) => Infix::Mul,
+            Some(SyntaxKind::Slash) => Infix::Div,
             _ => return,
         };
 
@@ -28,20 +43,32 @@ pub fn expr_binding_power(p: &mut Parser, minimum_binding_power: u8) {
 
         p.bump();
 
-        p.start_node_at(checkpoint, SyntaxKind::BinOp);
+        p.start_node_at(checkpoint, SyntaxKind::BinaryExpr);
         expr_binding_power(p, right_binding_power);
         p.finish_node();
     }
 }
 
-enum Op {
+enum Infix {
     Add,
     Sub,
     Mul,
     Div,
 }
 
-impl Op {
+enum PrefixOp {
+    Neg,
+}
+
+impl PrefixOp {
+    pub fn binding_power(&self) -> ((), u8) {
+        match self {
+            Self::Neg => ((), 5),
+        }
+    }
+}
+
+impl Infix {
     fn binding_power(&self) -> (u8, u8) {
         match self {
             Self::Add | Self::Sub => (1, 2),

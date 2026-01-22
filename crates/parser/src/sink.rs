@@ -2,13 +2,11 @@ use std::mem;
 
 use rowan::{GreenNode, GreenNodeBuilder, Language};
 
-use crate::{
-    lexer::{SyntaxKind, Token},
-    parser::Event,
-    syntax::LangLanguage,
-};
+use crate::Event;
+use lexer::Token;
+use syntax::{LangLanguage, SyntaxKind};
 
-pub(super) struct Sink<'t, 'input> {
+pub(crate) struct Sink<'t, 'input> {
     builder: GreenNodeBuilder<'static>,
     events: Vec<Event>,
     tokens: &'t [Token<'input>],
@@ -16,7 +14,7 @@ pub(super) struct Sink<'t, 'input> {
 }
 
 impl<'t, 'input> Sink<'t, 'input> {
-    pub(super) fn new(tokens: &'t [Token<'input>], events: Vec<Event>) -> Self {
+    pub(crate) fn new(tokens: &'t [Token<'input>], events: Vec<Event>) -> Self {
         Self {
             builder: GreenNodeBuilder::new(),
             tokens,
@@ -25,7 +23,7 @@ impl<'t, 'input> Sink<'t, 'input> {
         }
     }
 
-    pub(super) fn finish(mut self) -> GreenNode {
+    pub(crate) fn finish(mut self) -> GreenNode {
         for idx in 0..self.events.len() {
             match mem::replace(&mut self.events[idx], Event::Placeholder) {
                 Event::StartNode {
@@ -72,13 +70,13 @@ impl<'t, 'input> Sink<'t, 'input> {
     fn token(&mut self) {
         let Token { kind, text } = self.tokens[self.cursor];
         self.builder
-            .token(LangLanguage::kind_to_raw(kind), text.into());
+            .token(LangLanguage::kind_to_raw(kind.into()), text.into());
         self.cursor += 1;
     }
 
     fn eat_trivia(&mut self) {
         while let Some(token) = self.tokens.get(self.cursor) {
-            if token.kind != SyntaxKind::Whitespace {
+            if !SyntaxKind::from(token.kind).is_trivia() {
                 break;
             }
 

@@ -52,19 +52,14 @@ checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
 name = "lang"
 version = "0.1.0"
 dependencies = [
- "drop_bomb",
- "expect-test",
- "logos",
- "num-derive",
- "num-traits",
- "rowan",
+ "parser",
 ]
 
 [[package]]
-name = "lang-cli"
+name = "lexer"
 version = "0.1.0"
 dependencies = [
- "lang",
+ "logos",
 ]
 
 [[package]]
@@ -116,6 +111,17 @@ name = "once_cell"
 version = "1.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42f5e15c9953c5e4ccceeb2e7382a716482c34515315f7b03532b8b4e8393d2d"
+
+[[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "drop_bomb",
+ "expect-test",
+ "lexer",
+ "rowan",
+ "syntax",
+]
 
 [[package]]
 name = "proc-macro2"
@@ -224,6 +230,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "syntax"
+version = "0.1.0"
+dependencies = [
+ "lexer",
+ "num-derive",
+ "num-traits",
+ "rowan",
 ]
 
 [[package]]

@@ -1,9 +1,7 @@
-use rowan::SmolStr;
-
-use crate::lexer::SyntaxKind;
+use syntax::SyntaxKind;
 
 #[derive(Debug, Clone, PartialEq)]
-pub(super) enum Event {
+pub(crate) enum Event {
     StartNode {
         kind: SyntaxKind,
         forward_parent: Option<usize>,

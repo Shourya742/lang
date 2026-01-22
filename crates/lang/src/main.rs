@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use lang::parser::{Parser, parse};
+use parser::parse;
 
 fn main() -> io::Result<()> {
     let stdin = io::stdin();

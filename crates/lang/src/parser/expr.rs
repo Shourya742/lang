@@ -40,7 +40,7 @@ fn prefix_expr(p: &mut Parser) -> CompletedMarker {
 
     let m = p.start();
 
-    let op = PrefixOp::Neg;
+    let op = UnaryOp::Neg;
     let ((), right_binding_power) = op.binding_power();
 
     // Eat the operator’s token.
@@ -74,10 +74,10 @@ pub fn expr_binding_power(p: &mut Parser, minimum_binding_power: u8) {
 
     loop {
         let op = match p.peek() {
-            Some(SyntaxKind::Plus) => Infix::Add,
-            Some(SyntaxKind::Minus) => Infix::Sub,
-            Some(SyntaxKind::Star) => Infix::Mul,
-            Some(SyntaxKind::Slash) => Infix::Div,
+            Some(SyntaxKind::Plus) => BinaryOp::Add,
+            Some(SyntaxKind::Minus) => BinaryOp::Sub,
+            Some(SyntaxKind::Star) => BinaryOp::Mul,
+            Some(SyntaxKind::Slash) => BinaryOp::Div,
             _ => return,
         };
 
@@ -91,22 +91,22 @@ pub fn expr_binding_power(p: &mut Parser, minimum_binding_power: u8) {
 
         let m = lhs.precede(p);
         expr_binding_power(p, right_binding_power);
-        lhs = m.complete(p, SyntaxKind::BinaryExpr);
+        lhs = m.complete(p, SyntaxKind::InfixExpr);
     }
 }
 
-enum Infix {
+enum BinaryOp {
     Add,
     Sub,
     Mul,
     Div,
 }
 
-enum PrefixOp {
+enum UnaryOp {
     Neg,
 }
 
-impl PrefixOp {
+impl UnaryOp {
     pub fn binding_power(&self) -> ((), u8) {
         match self {
             Self::Neg => ((), 5),
@@ -114,7 +114,7 @@ impl PrefixOp {
     }
 }
 
-impl Infix {
+impl BinaryOp {
     fn binding_power(&self) -> (u8, u8) {
         match self {
             Self::Add | Self::Sub => (1, 2),
@@ -127,7 +127,6 @@ impl Infix {
 mod tests {
     use crate::parser::check;
 
-    use super::*;
     use expect_test::expect;
 
     #[test]

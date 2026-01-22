@@ -36,7 +36,7 @@ pub enum SyntaxKind {
     #[token("#.*")]
     Comment,
     Root,
-    BinaryExpr,
+    InfixExpr,
     Literal,
     ParenExpr,
     PrefixExpr,

@@ -1,6 +1,6 @@
 use std::mem;
 
-use rowan::{Checkpoint, GreenNode, GreenNodeBuilder, Language, SmolStr};
+use rowan::{GreenNode, GreenNodeBuilder, Language};
 
 use crate::{
     lexer::{SyntaxKind, Token},
@@ -58,8 +58,7 @@ impl<'t, 'input> Sink<'t, 'input> {
                         self.builder.start_node(LangLanguage::kind_to_raw(kind));
                     }
                 }
-                Event::StartNodeAt { .. } => unreachable!(),
-                Event::AddToken { kind, text } => self.token(kind, text),
+                Event::AddToken => self.token(),
                 Event::FinishNode => self.builder.finish_node(),
                 Event::Placeholder => {}
             }
@@ -70,8 +69,10 @@ impl<'t, 'input> Sink<'t, 'input> {
         self.builder.finish()
     }
 
-    fn token(&mut self, kind: SyntaxKind, text: SmolStr) {
-        self.builder.token(LangLanguage::kind_to_raw(kind), text);
+    fn token(&mut self) {
+        let Token { kind, text } = self.tokens[self.cursor];
+        self.builder
+            .token(LangLanguage::kind_to_raw(kind), text.into());
         self.cursor += 1;
     }
 
@@ -81,7 +82,7 @@ impl<'t, 'input> Sink<'t, 'input> {
                 break;
             }
 
-            self.token(token.kind, token.text.into());
+            self.token();
         }
     }
 }

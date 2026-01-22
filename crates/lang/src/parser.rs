@@ -1,4 +1,3 @@
-use std::iter::Peekable;
 mod event;
 mod expr;
 mod marker;
@@ -6,8 +5,7 @@ mod sink;
 mod source;
 #[cfg(test)]
 use expect_test::Expect;
-use logos::Logos;
-use rowan::{Checkpoint, GreenNode, GreenNodeBuilder, Language, SyntaxNode};
+use rowan::{GreenNode, SyntaxNode};
 
 use crate::{
     lexer::{Lexer, SyntaxKind, Token},
@@ -39,36 +37,14 @@ impl<'t, 'input> Parser<'t, 'input> {
         self.events
     }
 
-    fn start_node(&mut self, kind: SyntaxKind) {
-        self.events.push(Event::StartNode {
-            kind,
-            forward_parent: None,
-        });
-    }
-
-    fn finish_node(&mut self) {
-        self.events.push(Event::FinishNode);
-    }
-
     fn peek(&mut self) -> Option<SyntaxKind> {
         self.source.peek_kind()
     }
 
     fn bump(&mut self) {
-        let Token { kind, text } = self.source.next_token().unwrap();
+        self.source.next_token().unwrap();
 
-        self.events.push(Event::AddToken {
-            kind: *kind,
-            text: text.into(),
-        });
-    }
-
-    fn start_node_at(&mut self, checkpoint: usize, kind: SyntaxKind) {
-        self.events.push(Event::StartNodeAt { kind, checkpoint });
-    }
-
-    fn checkpoint(&self) -> usize {
-        self.events.len()
+        self.events.push(Event::AddToken);
     }
 
     fn start(&mut self) -> Marker {

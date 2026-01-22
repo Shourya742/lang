@@ -3,23 +3,23 @@ use std::mem;
 use rowan::{Checkpoint, GreenNode, GreenNodeBuilder, Language, SmolStr};
 
 use crate::{
-    lexer::{Lexeme, SyntaxKind},
+    lexer::{SyntaxKind, Token},
     parser::Event,
     syntax::LangLanguage,
 };
 
-pub(super) struct Sink<'l, 'input> {
+pub(super) struct Sink<'t, 'input> {
     builder: GreenNodeBuilder<'static>,
     events: Vec<Event>,
-    lexemes: &'l [Lexeme<'input>],
+    tokens: &'t [Token<'input>],
     cursor: usize,
 }
 
-impl<'l, 'input> Sink<'l, 'input> {
-    pub(super) fn new(lexemes: &'l [Lexeme<'input>], events: Vec<Event>) -> Self {
+impl<'t, 'input> Sink<'t, 'input> {
+    pub(super) fn new(tokens: &'t [Token<'input>], events: Vec<Event>) -> Self {
         Self {
             builder: GreenNodeBuilder::new(),
-            lexemes,
+            tokens,
             events,
             cursor: 0,
         }
@@ -76,12 +76,12 @@ impl<'l, 'input> Sink<'l, 'input> {
     }
 
     fn eat_trivia(&mut self) {
-        while let Some(lexeme) = self.lexemes.get(self.cursor) {
-            if lexeme.kind != SyntaxKind::Whitespace {
+        while let Some(token) = self.tokens.get(self.cursor) {
+            if token.kind != SyntaxKind::Whitespace {
                 break;
             }
 
-            self.token(lexeme.kind, lexeme.text.into());
+            self.token(token.kind, token.text.into());
         }
     }
 }

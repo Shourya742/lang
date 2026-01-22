@@ -1,6 +1,7 @@
 use std::iter::Peekable;
 mod event;
 mod expr;
+mod marker;
 mod sink;
 mod source;
 #[cfg(test)]
@@ -10,7 +11,7 @@ use rowan::{Checkpoint, GreenNode, GreenNodeBuilder, Language, SyntaxNode};
 
 use crate::{
     lexer::{Lexeme, Lexer, SyntaxKind},
-    parser::{event::Event, sink::Sink, source::Source},
+    parser::{event::Event, marker::Marker, sink::Sink, source::Source},
     syntax::LangLanguage,
 };
 
@@ -27,15 +28,22 @@ impl<'l, 'input> Parser<'l, 'input> {
         }
     }
 
+    fn at(&mut self, kind: SyntaxKind) -> bool {
+        self.peek() == Some(kind)
+    }
+
     pub fn parse(mut self) -> Vec<Event> {
-        self.start_node(SyntaxKind::Root);
+        let m = self.start();
         expr::expr(&mut self);
-        self.finish_node();
+        m.complete(&mut self, SyntaxKind::Root);
         self.events
     }
 
     fn start_node(&mut self, kind: SyntaxKind) {
-        self.events.push(Event::StartNode { kind });
+        self.events.push(Event::StartNode {
+            kind,
+            forward_parent: None,
+        });
     }
 
     fn finish_node(&mut self) {
@@ -61,6 +69,12 @@ impl<'l, 'input> Parser<'l, 'input> {
 
     fn checkpoint(&self) -> usize {
         self.events.len()
+    }
+
+    fn start(&mut self) -> Marker {
+        let pos = self.events.len();
+        self.events.push(Event::Placeholder);
+        Marker::new(pos)
     }
 }
 

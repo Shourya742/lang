@@ -37,7 +37,10 @@ pub enum SyntaxKind {
     Comment,
     Root,
     BinaryExpr,
+    Literal,
+    ParenExpr,
     PrefixExpr,
+    VariableRef,
 }
 
 impl SyntaxKind {

@@ -126,7 +126,7 @@ impl VariableRef {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Root(SyntaxNode);
 
 impl Root {
@@ -138,7 +138,7 @@ impl Root {
         }
     }
 
-    pub fn stmts(&self) -> impl Iterator<Item = Stmt> {
+    pub fn stmts(self) -> impl Iterator<Item = Stmt> {
         self.0.children().filter_map(Stmt::cast)
     }
 }

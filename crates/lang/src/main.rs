@@ -16,9 +16,9 @@ fn main() -> io::Result<()> {
         let parse = parse(&input);
         println!("{}", parse.debug_tree());
         let root = ast::Root::cast(parse.syntax()).unwrap();
-
         dbg!(
-            root.stmts()
+            root.clone()
+                .stmts()
                 .filter_map(|stmt| if let ast::Stmt::VariableDef(var_def) = stmt {
                     Some(var_def.value())
                 } else {
@@ -26,6 +26,7 @@ fn main() -> io::Result<()> {
                 })
                 .collect::<Vec<_>>()
         );
+        dbg!(hir::lower(root).collect::<Vec<_>>());
 
         input.clear();
     }

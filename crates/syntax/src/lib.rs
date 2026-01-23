@@ -1,5 +1,3 @@
-use std::fmt;
-
 use lexer::TokenKind;
 use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::{FromPrimitive, ToPrimitive};

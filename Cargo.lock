@@ -6,6 +6,7 @@ version = 4
 name = "ast"
 version = "0.1.0"
 dependencies = [
+ "smol_str",
  "syntax",
 ]
 
@@ -59,6 +60,7 @@ checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
 name = "lang"
 version = "0.1.0"
 dependencies = [
+ "ast",
  "parser",
 ]
 

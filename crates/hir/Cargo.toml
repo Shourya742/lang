@@ -7,4 +7,4 @@ edition = "2024"
 ast = {path = "../ast"}
 smol_str = "0.1.17"
 syntax = {path = "../syntax"}
-arena = {path = "../arena"}
+la-arena = "0.2.0"

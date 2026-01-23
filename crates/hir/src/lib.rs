@@ -1,6 +1,5 @@
-use arena::Idx;
+use la_arena::Idx;
 use smol_str::SmolStr;
-use syntax::SyntaxKind;
 mod database;
 pub use database::Database;
 

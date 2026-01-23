@@ -1,15 +1,12 @@
-use arena::Arena;
+use la_arena::Arena;
 use syntax::SyntaxKind;
 
 use crate::{BinaryOp, Expr, Stmt, UnaryOp};
 
-
-
 #[derive(Debug, Default)]
 pub struct Database {
-    pub exprs: Arena<Expr>
+    pub exprs: Arena<Expr>,
 }
-
 
 impl Database {
     pub(crate) fn lower_stmt(&mut self, ast: ast::Stmt) -> Option<Stmt> {

@@ -5,6 +5,8 @@ use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::{FromPrimitive, ToPrimitive};
 
 pub type SyntaxNode = rowan::SyntaxNode<LangLanguage>;
+pub type SyntaxToken = rowan::SyntaxToken<LangLanguage>;
+pub type SyntaxElement = rowan::SyntaxElement<LangLanguage>;
 
 #[derive(Debug, Copy, Clone, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum SyntaxKind {

@@ -5,4 +5,3 @@ edition = "2024"
 
 [dependencies]
 syntax = {path = "../syntax"}
-smol_str = "0.1.17"

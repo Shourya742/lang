@@ -1,3 +1,5 @@
+use std::fmt;
+
 use lexer::TokenKind;
 use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::{FromPrimitive, ToPrimitive};
@@ -28,12 +30,7 @@ pub enum SyntaxKind {
     ParenExpr,
     PrefixExpr,
     VariableRef,
-}
-
-impl SyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(self, Self::Whitespace | Self::Comment)
-    }
+    VariableDef,
 }
 
 impl From<TokenKind> for SyntaxKind {

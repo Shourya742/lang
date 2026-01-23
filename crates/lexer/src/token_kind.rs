@@ -1,3 +1,5 @@
+use std::fmt;
+
 use logos::Logos;
 
 #[derive(Debug, Copy, Clone, PartialEq, Logos)]
@@ -51,6 +53,35 @@ pub enum TokenKind {
     Error,
 }
 
+impl TokenKind {
+    pub fn is_trivia(self) -> bool {
+        matches!(self, Self::Whitespace | Self::Comment)
+    }
+}
+
+impl fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            Self::Whitespace => "whitespace",
+            Self::FnKw => "‘fn’",
+            Self::LetKw => "‘let’",
+            Self::Ident => "identifier",
+            Self::Number => "number",
+            Self::Plus => "‘+’",
+            Self::Minus => "‘-’",
+            Self::Star => "‘*’",
+            Self::Slash => "‘/’",
+            Self::Equals => "‘=’",
+            Self::LParen => "‘(’",
+            Self::RParen => "‘)’",
+            Self::LBrace => "‘{’",
+            Self::RBrace => "‘}’",
+            Self::Comment => "comment",
+            Self::Error => "an unrecognized token",
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::*;
@@ -58,7 +89,14 @@ mod tests {
     fn check(input: &str, kind: TokenKind) {
         let mut lexer = Lexer::new(input);
 
-        assert_eq!(lexer.next(), Some(Token { kind, text: input }));
+        assert_eq!(
+            lexer.next(),
+            Some(Token {
+                kind,
+                text: input,
+                range: TextRange::default()
+            })
+        );
     }
 
     #[test]
